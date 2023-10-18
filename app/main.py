@@ -8,7 +8,7 @@ app = FastAPI()
 MONGO_URL = config("MONGO_URL", default="mongodb://localhost:27017/test_database")
 
 client = MongoClient(MONGO_URL)
-db_name = MONGO_URL.split('/')[-1]  # Extract the database name from the URL
+db_name = "ws-auth"
 db = client[db_name]
 
 @app.get("/")

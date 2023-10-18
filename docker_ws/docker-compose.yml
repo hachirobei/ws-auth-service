@@ -5,38 +5,38 @@ services:
     build:
       context: ..
       dockerfile: docker_ws/Dockerfile
-    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+    command: uvicorn app.main:app --reload --host 0.0.0.0 --port ${UVICORN_PORT}
     hostname: ws-auth-service
     container_name: ws-auth-service
     volumes:
       - ../app/:/app/
     ports:
-      - 8001:8000
+      - "${WS_AUTH_SERVICE_PORT}:${UVICORN_PORT}"
     environment:
-      - DATABASE_URI=mongodb://mongo-info-ws_username:user@password/weather
-      - WS_AUTH_SERVICE_HOST_URL=http://ws-auth-service:8000/api/v1/auth
+      MONGO_URL: "${WS_AUTH_SERVICE_MONGO_URL}"
+      WS_AUTH_SERVICE_HOST_URL: "${WS_AUTH_SERVICE_HOST_URL}"
     depends_on:
       - mongo-auth-ws
     networks:     
-      - ws_app_network
+      - ${NETWORK_NAME}
 
   mongo-auth-ws:
     container_name: mongo-auth-ws
     image: "mongo"
     ports:
-      - "27017:27017"  # Updated port mapping to have a fixed host port.
+      - "${MONGO_DB_PORT}:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: rootpassword
-      MONGO_INITDB_DATABASE: weather
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     volumes:
       - mongo-auth-data:/data/db
       - ./mangodb/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
     networks:    
-      - ws_app_network
+      - ${NETWORK_NAME}
 
 volumes:
-  mongo-auth-data:  # The name here should match the name used in the service volume mapping above.
+  mongo-auth-data:
 
 networks:
   ws_app_network:
